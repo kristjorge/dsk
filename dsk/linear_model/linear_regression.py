@@ -1,5 +1,5 @@
 import dsk.metrics
-import dsk.costs
+import dsk.metrics.costs
 import numpy as np
 
 
@@ -10,7 +10,7 @@ class LinearRegression:
         self._lr = learning_rate
         self.coefficients = []
         self.mse = []
-        self.cost = dsk.costs.mse
+        self.cost = dsk.metrics.costs.mse
         self.features = []
         self.R = None
 
@@ -27,8 +27,8 @@ class LinearRegression:
         if len(X.shape) == 1:  # Only (M,) size
             self.features.append(X.reshape(-1, 1))
         else:
-            for col in range(X.shape[0]):
-                self.features.append(X[col].reshape(-1, 1))
+            for col in range(X.shape[1]):
+                self.features.append(X[:, col].reshape(-1, 1))
 
         if len(y.shape) == 1:
             y = y.reshape(-1, 1)
@@ -67,12 +67,12 @@ class LinearRegression:
 
         if len(X.shape) == 1:  # Only (M,) size
             features = [(X.reshape(-1, 1))]
-            if len(features) != len(self.coefficients):
+            if len(features) + 1 != len(self.coefficients):
                 quit('Dimensions do not align')
         else:
-            features = [X[i].reshape(-1, 1) for i in range(X.shape[0])]
+            features = [X[:, i].reshape(-1, 1) for i in range(X.shape[1])]
 
-        if len(features) != len(self.coefficients):
+        if len(features) + 1 != len(self.coefficients):
             quit('Dimensions do not align')
 
         # Calculate function value

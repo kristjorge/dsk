@@ -1,5 +1,5 @@
 import numpy as np
-from dsk.costs.cost_functions import mse
+from dsk.metrics.costs import mse
 
 
 def r_squared(y, f_fitted):
