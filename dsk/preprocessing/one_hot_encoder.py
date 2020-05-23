@@ -52,3 +52,11 @@ class OneHotEncoder:
             if value not in self.columns_to_encode[c]:
                 self.columns_to_encode[c][value] = None
 
+
+class Label:
+    def __init__(self, column, decoded_label):
+        self.decoded_column = column
+        self.decoded_label = decoded_label
+        self.encoded_columns = []
+        self.encoded_label = None
+
