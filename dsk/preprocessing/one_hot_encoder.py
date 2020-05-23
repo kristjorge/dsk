@@ -26,16 +26,29 @@ class OneHotEncoder:
     def transform(self, X):
         for column_no, encode_col in self.columns_to_encode.items():
             new_cols = np.array([self.encode(column_no, label) for label in X[:, column_no]])
-            X = np.column_stack((X[:,:column_no], new_cols, X[:, column_no:]))
+            X = np.column_stack((X[:, :column_no], new_cols, X[:, column_no:]))
             X = np.delete(X, new_cols.shape[1]+1, 1)
+        return X
+
+    def transform_back(self, X):
+        for column_no, decode_vector in self.columns_to_encode.items():
+            decode_dimension = len(decode_vector)
+            new_cols = np.array([self.decode(column_no, vector) for vector in X[:, column_no:decode_dimension+1]])
+            X = np.delete(X, range(column_no, column_no+decode_dimension), axis=1)
+            X = np.column_stack((X[:, :column_no], new_cols, X[:, column_no:]))
         return X
 
     def encode(self, column_no, input_label):
         encoded = self.columns_to_encode[column_no][input_label]
         return encoded
 
+    def decode(self, column_no, encoded_label):
+        for key, encoded in self.columns_to_encode[column_no].items():
+            if (encoded == encoded_label).all():
+                return key
+
     def detect_labels(self, X, c):
         for value in X:
             if value not in self.columns_to_encode[c]:
-                self.columns_to_encode[c][value] =  None
+                self.columns_to_encode[c][value] = None
 

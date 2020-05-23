@@ -9,8 +9,8 @@ def main():
     one_hot_encoder = preprocessing.OneHotEncoder()
     one_hot_encoder.fit(X, [1])
     X_v2 = one_hot_encoder.transform(X)
+    X_v3 = one_hot_encoder.transform_back(X_v2)
     a=1
-
 
 if __name__ == '__main__':
     main()
