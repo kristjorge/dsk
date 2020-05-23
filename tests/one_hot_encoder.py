@@ -8,8 +8,8 @@ def main():
     X = df.iloc[:, [1, 2, 6]].values
     one_hot_encoder = preprocessing.OneHotEncoder()
     one_hot_encoder.fit(X, [1])
-    X_v2 = one_hot_encoder.transform(X)
-    X_v3 = one_hot_encoder.transform_back(X_v2)
+    X_transformed = one_hot_encoder.transform()
+    X_transformed_back = one_hot_encoder.transform_back()
 
 
 if __name__ == '__main__':
