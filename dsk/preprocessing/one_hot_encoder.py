@@ -4,53 +4,73 @@ import numpy as np
 class OneHotEncoder:
 
     def __init__(self):
-        self.columns_to_encode = {}
+        # self.labels = {}
+        self.labels = []
 
     def fit(self, X, columns, labels=None):
-        self.columns_to_encode = {c: {} for c in columns}
         if labels is None:
             for c in columns:
                 self.detect_labels(X[:, c], c)
         else:
             for idx, c in enumerate(columns):
-                self.columns_to_encode[c][labels[idx]] = None
+                self.labels.append(Label(c, labels[idx]))
 
         # Set all encoded values to an np.array with size equal to the number of distinct values to encode
-        for encode_col in self.columns_to_encode.values():
-            label_counter = 0
-            for encode_label_key in encode_col.keys():
-                encode_col[encode_label_key] = np.zeros(len(encode_col), dtype=int)
-                encode_col[encode_label_key][label_counter] = 1
-                label_counter += 1
+        label_columns = self._decoded_label_columns()
+        for label_column in label_columns:
+            for label_idx, label in enumerate(self._label_by_decoded_column(label_column)):
+                label.encoded_label = np.zeros(self._num_distinct_labels_in_column(label_column), dtype=int)
+                label.encoded_label[label_idx] = 1
+                label.encoded_columns = range(label_column,
+                                              label_column+self._num_distinct_labels_in_column(label_column)+1)
 
     def transform(self, X):
-        for column_no, encode_col in self.columns_to_encode.items():
-            new_cols = np.array([self.encode(column_no, label) for label in X[:, column_no]])
-            X = np.column_stack((X[:, :column_no], new_cols, X[:, column_no:]))
+        label_columns = self._decoded_label_columns()
+        for label_column in label_columns:
+            new_cols = np.array([self._encode(label_column, l) for l in X[:, label_column]])
+            X = np.column_stack((X[:, :label_column], new_cols, X[:, label_column:]))
             X = np.delete(X, new_cols.shape[1]+1, 1)
+
         return X
 
     def transform_back(self, X):
-        for column_no, decode_vector in self.columns_to_encode.items():
-            decode_dimension = len(decode_vector)
-            new_cols = np.array([self.decode(column_no, vector) for vector in X[:, column_no:decode_dimension+1]])
-            X = np.delete(X, range(column_no, column_no+decode_dimension), axis=1)
-            X = np.column_stack((X[:, :column_no], new_cols, X[:, column_no:]))
+        label_columns = self._decoded_label_columns()
+        for label_column in label_columns:
+            decode_dimension = self._num_distinct_labels_in_column(label_column)
+            new_cols = np.array([self._decode(label_column, vector) for vector in X[:, label_column:decode_dimension + 1]])
+            X = np.delete(X, range(label_column, label_column+decode_dimension), axis=1)
+            X = np.column_stack((X[:, :label_column], new_cols, X[:, label_column:]))
         return X
 
-    def encode(self, column_no, input_label):
-        encoded = self.columns_to_encode[column_no][input_label]
-        return encoded
+    def _encode(self, decoded_column, decoded_label):
+        labels = self._label_by_decoded_column(decoded_column)
+        return [label.encoded_label for label in labels if label.decoded_label == decoded_label][0]
 
-    def decode(self, column_no, encoded_label):
-        for key, encoded in self.columns_to_encode[column_no].items():
-            if (encoded == encoded_label).all():
-                return key
+    def _decode(self, decoded_column, encoded_label):
+        labels = self._label_by_decoded_column(decoded_column)
+        for label in labels:
+            if (label.encoded_label == encoded_label).all():
+                return label.decoded_label
 
     def detect_labels(self, X, c):
+        # Loops over X and adds new labels to self.labels if it is not already in the list
         for value in X:
-            if value not in self.columns_to_encode[c]:
-                self.columns_to_encode[c][value] = None
+            if value not in [label.decoded_label for label in self.labels]:
+                self.labels.append(Label(c, value))
+
+    def _label_by_decoded_column(self, c):
+        return [label for label in self.labels if label.decoded_column == c]
+
+    def _decoded_label_columns(self):
+        cols = []
+        for label in self.labels:
+            if label.decoded_column not in cols:
+                cols.append(label.decoded_column)
+        return cols
+
+    def _num_distinct_labels_in_column(self, c):
+        labels = self._label_by_decoded_column(c)
+        return len(labels)
 
 
 class Label:
