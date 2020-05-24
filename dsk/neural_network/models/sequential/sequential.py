@@ -1,8 +1,6 @@
-from neural_network.models.sequential.layers import PerceptronLayer
-from neural_network.models.sequential.layers import InputLayer
-from neural_network.models.sequential.layers import OutputLayer
-import cost_functions
-import neural_network.utils
+from dsk.metrics.costs import mse
+from dsk.neural_network.models import sequential
+from dsk.utils.progress_bar import ProgressBar
 import numpy as np
 
 
@@ -31,18 +29,18 @@ class Sequential:
         """
 
         super().__init__()
-        self.x_train = list()
-        self.y_train = list()
+        self.x_train = None
+        self.y_train = None
         self.costs = []
         self.learning_rate = learning_rate
         self.cost_function = None
-        self.layers = [InputLayer(input_size), OutputLayer(output_size)]
+        self.layers = [sequential.InputLayer(input_size), sequential.OutputLayer(output_size)]
         self.progress_bar = None
         if cost_function == 'mse':
-            self.cost_function = cost_functions.mse
+            self.cost_function = mse
         else:
             print("No other cost function yet implemented..\nSetting it to 'mse'")
-            self.cost_function = cost_functions.mse
+            self.cost_function = mse
 
     def __len__(self):
         return len(self.layers)
@@ -55,13 +53,29 @@ class Sequential:
     def output_layer(self):
         return self.layers[-1]
 
-    def add_hidden_layer(self, layer):
+    def add_layer(self, layer):
+
         """
-        :param layer: The new layer to be appended to the network
-        :return: Nothing
+        Adds a new layer to the sequential model.
+
+        If the layer is of type InputLayer, place it at the start
+        If the layer is of type OutputLayer, place it at the end
+        If neither, check for whether or not an OutputLayer is at the end.
+            If it is: insert it at the next last place.
+            If not: append it at the end
+        :param layer:
+        :return:
         """
-        assert type(layer) == PerceptronLayer
-        self.layers.insert(-1, layer)
+
+        if type(layer) == sequential.InputLayer:
+            self.layers.insert(0, layer)
+        elif type(layer) == sequential.OutputLayer:
+            self.layers.insert(-1, layer)
+        else:
+            if type(self.layers[-1]) == sequential.OutputLayer:  # If there is an Output layer
+                self.layers.insert(-1, layer)
+            else:
+                self.layers.append(layer)
 
     def initialise(self, x_train, y_train):
 
@@ -88,11 +102,11 @@ class Sequential:
 
     def train(self, x_train, y_train, epochs):
         self.initialise(x_train, y_train)
-        self.progress_bar = neural_network.utils.ProgressBar(epochs)
+        self.progress_bar = ProgressBar(epochs)
         for _ in range(epochs):
             self.reset_gradients()
             costs = []
-            for i in range(len(self.x_train)):
+            for i in range(self.x_train.shape[0]):
                 self.forward_pass(i)
                 costs.append(self.output_layer.total_error)
                 self.backward_pass()
@@ -121,15 +135,15 @@ class Sequential:
 
     def forward_pass(self, training_sample_no):
 
-        training_input = self.x_train[training_sample_no]
+        training_input = self.x_train[training_sample_no, :]
         training_output = self.y_train[training_sample_no]
         if type(training_input) == list:
-            training_input = np.array(training_input).reshape(-1,1)
+            training_input = np.array(training_input).reshape(-1, 1)
         elif type(training_input) == np.ndarray and len(training_input.shape) == 1:
             training_input = training_input.reshape(-1, 1)
 
         if type(training_output) == list:
-            training_output = np.array(training_output).reshape(-1,1)
+            training_output = np.array(training_output).reshape(-1, 1)
         elif type(training_input) == np.ndarray and len(training_output.shape) == 1:
             training_output = training_output.reshape(-1, 1)
 

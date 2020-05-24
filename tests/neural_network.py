@@ -41,8 +41,8 @@ def main():
 
     np.random.seed(0)
     nn = Sequential(input_size=1, output_size=1, cost_function='mse', learning_rate=0.1)
-    nn.add_hidden_layer(PerceptronLayer(3, activation_function='sigmoid', dropout=0.0))
-    nn.add_hidden_layer(PerceptronLayer(3, activation_function='sigmoid', dropout=0.0))
+    nn.add_layer(PerceptronLayer(3, activation_function='sigmoid', dropout=0.0))
+    nn.add_layer(PerceptronLayer(3, activation_function='sigmoid', dropout=0.0))
     nn.train(x_train, y_train, epochs=10)
 
     for x in x_pred:

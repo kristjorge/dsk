@@ -1,4 +1,4 @@
-import activation_functions
+from dsk.neural_network.activation_functions import get_activation_function
 import numpy as np
 
 
@@ -8,7 +8,7 @@ class InputLayer:
         self.size = size
         self.network = None
         self.layer_no = None
-        self.activation_function = activation_functions.get_activation_function(activation_function)
+        self.activation_function = get_activation_function(activation_function)
         self.z = None
         self.h = None
         self.b = None
@@ -56,7 +56,7 @@ class InputLayer:
 
 
 class OutputLayer:
-    def __init__(self, size, activation_function='linear'):
+    def __init__(self, size, activation_function='relu'):
 
         self.size = size
         self.network = None
@@ -72,7 +72,7 @@ class OutputLayer:
         self.error = None
         self.weight_gradient = None
         self.bias_gradient = None
-        self.activation_function = activation_functions.get_activation_function(activation_function)
+        self.activation_function = get_activation_function(activation_function)
 
     def initialise(self, network, layer_no):
         previous_layer = network.layers[layer_no - 1]
@@ -131,7 +131,7 @@ class PerceptronLayer:
 
     def __init__(self, size, activation_function='linear', dropout=0.):
 
-        self.activation_function = activation_functions.get_activation_function(activation_function)
+        self.activation_function = get_activation_function(activation_function)
         self.size = size
         self.network = None
         self.layer_no = None

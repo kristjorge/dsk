@@ -28,13 +28,13 @@ class OneHotEncoder:
     def transform(self):
         label_columns = self._decoded_label_columns()
         for label_column in label_columns:
-            new_cols = np.array([self._encode(label_column, l) for l in self.X[:, label_column]])
+            new_cols = np.array([self._encode(label_column, label) for label in self.X[:, label_column]])
             self.X = np.column_stack((self.X[:, :label_column], new_cols, self.X[:, label_column:]))
             self.X = np.delete(self.X, new_cols.shape[1]+1, 1)
 
         return self.X
 
-    def transform_back(self):
+    def inverse_transform(self):
         label_columns = self._decoded_label_columns()
         for label_column in label_columns:
             decode_dimension = self._num_distinct_labels_in_column(label_column)
