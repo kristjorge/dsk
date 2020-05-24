@@ -18,9 +18,10 @@ def main():
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
-    nn = sequential.Sequential(input_size=3, output_size=1, cost_function='mse', learning_rate=0.1)
-    nn.add_layer(sequential.PerceptronLayer(3, activation_function='relu', dropout=0.0))
-    nn.add_layer(sequential.PerceptronLayer(2, activation_function='relu', dropout=0.0))
+    nn = sequential.Sequential(cost_function='mse', learning_rate=0.1)
+    nn.add_layer(sequential.InputLayer(3, activation_function='relu'))
+    nn.add_layer(sequential.OutputLayer(1, activation_function='relu'))
+    nn.add_layer(sequential.PerceptronLayer(3, activation_function='relu'))
     nn.train(X_train, y_train, epochs=50)
 
     plt.plot(nn.costs)

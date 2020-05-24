@@ -19,13 +19,13 @@ class Sequential:
 
     """
 
-    def __init__(self, input_size, output_size, learning_rate=0.01, cost_function='mse'):
+    def __init__(self, learning_rate=0.01, cost_function='mse'):
 
         """
 
         :param learning_rate: Learning rate used in gradient descent to update weights and biases
-        :param input_size: Size of the input vector
-        :param output_size: Size of the output vector
+        :param cost_function: Which cost function should be used in computing costs. Currently only MSE is
+        implemented
         """
 
         super().__init__()
@@ -34,7 +34,7 @@ class Sequential:
         self.costs = []
         self.learning_rate = learning_rate
         self.cost_function = None
-        self.layers = [sequential.InputLayer(input_size), sequential.OutputLayer(output_size)]
+        self.layers = []
         self.progress_bar = None
         if cost_function == 'mse':
             self.cost_function = mse
@@ -101,6 +101,11 @@ class Sequential:
         self.costs.append(avg_cost)
 
     def train(self, x_train, y_train, epochs):
+
+        # Check if first layer is an InputLayer and last layer is an OutputLayer
+        if not type(self.layers[0]) == sequential.InputLayer or not type(self.layers[-1]) == sequential.OutputLayer:
+            quit('Model needs to have an input layer and output layer to work\nQuitting...')
+
         self.initialise(x_train, y_train)
         self.progress_bar = ProgressBar(epochs)
         for _ in range(epochs):
