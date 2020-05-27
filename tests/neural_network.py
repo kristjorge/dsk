@@ -1,6 +1,6 @@
 import numpy as np
-from dsk.neural_network.models.sequential.sequential import Sequential
-from dsk.neural_network.models.sequential.layers import PerceptronLayer
+from dsk.neural_network.models.mlp.mlp import Sequential
+from dsk.neural_network.layers.layers import PerceptronLayer
 from matplotlib import pyplot as plt
 
 

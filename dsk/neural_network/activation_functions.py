@@ -62,13 +62,21 @@ def tanh(activation, derivative=False):
                         Used in the backward passing
     """
 
-    transformation = (m.exp(activation) - m.exp(-activation)) / (m.exp(activation) + m.exp(-activation))
+    # transformation = (m.exp(activation) - m.exp(-activation)) / (m.exp(activation) + m.exp(-activation))
+    transformation = 2 / (1 + m.exp(-2*activation)) - 1
     if not derivative:
         return transformation
 
     else:
         return 1 - transformation**2
 
+
+def arctan(activation, derivative=False):
+    if not derivative:
+        return m.atan(activation)
+
+    else:
+        return 1 / (1 + activation**2)
 
 def linear(activation, derivative=False):
 

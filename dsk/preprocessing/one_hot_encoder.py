@@ -8,7 +8,11 @@ class OneHotEncoder:
         self.X = None
 
     def fit(self, X, columns, labels=None):
-        self.X = X
+        if len(X.shape) == 1:
+            self.X = X.reshape(-1,1)
+        else:
+            self.X = X
+
         if labels is None:
             for c in columns:
                 self.detect_labels(self.X[:, c], c)
@@ -28,9 +32,9 @@ class OneHotEncoder:
     def transform(self):
         label_columns = self._decoded_label_columns()
         for label_column in label_columns:
-            new_cols = np.array([self._encode(label_column, label) for label in self.X[:, label_column]])
+            new_cols = np.array([self._encode(label_column, label) for label in self.X[:, label_column]], dtype=int)
             self.X = np.column_stack((self.X[:, :label_column], new_cols, self.X[:, label_column:]))
-            self.X = np.delete(self.X, new_cols.shape[1]+1, 1)
+            self.X = np.delete(self.X, new_cols.shape[1], 1)  # new_cols.shape[1] + 1?
 
         return self.X
 

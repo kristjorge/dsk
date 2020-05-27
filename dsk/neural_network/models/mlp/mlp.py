@@ -1,5 +1,5 @@
 from dsk.metrics.costs import mse
-from dsk.neural_network.models import sequential
+import dsk.neural_network.layers.layers as mlp_layers
 from dsk.utils.progress_bar import ProgressBar
 import numpy as np
 
@@ -28,7 +28,6 @@ class Sequential:
         implemented
         """
 
-        super().__init__()
         self.x_train = None
         self.y_train = None
         self.costs = []
@@ -56,7 +55,7 @@ class Sequential:
     def add_layer(self, layer):
 
         """
-        Adds a new layer to the sequential model.
+        Adds a new layer to the mlp model.
 
         If the layer is of type InputLayer, place it at the start
         If the layer is of type OutputLayer, place it at the end
@@ -67,12 +66,12 @@ class Sequential:
         :return:
         """
 
-        if type(layer) == sequential.InputLayer:
+        if type(layer) == mlp_layers.InputLayer:
             self.layers.insert(0, layer)
-        elif type(layer) == sequential.OutputLayer:
-            self.layers.insert(-1, layer)
+        elif type(layer) == mlp_layers.OutputLayer:
+            self.layers.insert(len(self.layers), layer)
         else:
-            if type(self.layers[-1]) == sequential.OutputLayer:  # If there is an Output layer
+            if type(self.layers[-1]) == mlp_layers.OutputLayer:  # If there is an Output layer
                 self.layers.insert(-1, layer)
             else:
                 self.layers.append(layer)
@@ -103,7 +102,7 @@ class Sequential:
     def train(self, x_train, y_train, epochs):
 
         # Check if first layer is an InputLayer and last layer is an OutputLayer
-        if not type(self.layers[0]) == sequential.InputLayer or not type(self.layers[-1]) == sequential.OutputLayer:
+        if not type(self.layers[0]) == mlp_layers.InputLayer or not type(self.layers[-1]) == mlp_layers.OutputLayer:
             quit('Model needs to have an input layer and output layer to work\nQuitting...')
 
         self.initialise(x_train, y_train)
@@ -163,4 +162,4 @@ class Sequential:
 
     def adjust_weights_and_biases(self):
         for layer in self.layers:
-            layer.adjust_with_gradients(self.learning_rate)
+            layer.adjust_with_gradients()
