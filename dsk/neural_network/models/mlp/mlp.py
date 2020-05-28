@@ -4,7 +4,7 @@ from dsk.utils.progress_bar import ProgressBar
 import numpy as np
 
 
-class Sequential:
+class MLP:
 
     """
     Attributes:
@@ -30,9 +30,10 @@ class Sequential:
 
         self.x_train = None
         self.y_train = None
-        self.costs = []
+        self.average_costs = []
         self.learning_rate = learning_rate
         self.cost_function = None
+        self.all_costs = []
         self.layers = []
         self.progress_bar = None
         if cost_function == 'mse':
@@ -96,8 +97,8 @@ class Sequential:
             layer.initialise(self, layer_no)
 
     def compute_avg_costs(self, costs):
-        avg_cost = sum(costs) / len(costs)
-        self.costs.append(avg_cost)
+        self.all_costs.append(costs)
+        self.average_costs.append(sum(costs) / len(costs))
 
     def train(self, x_train, y_train, epochs):
 

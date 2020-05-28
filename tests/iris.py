@@ -16,7 +16,7 @@ def main():
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
     np.random.seed(0)
-    nn = mlp.Sequential(cost_function='mse', learning_rate=0.0001)
+    nn = mlp.MLP(cost_function='mse', learning_rate=0.0001)
     nn.add_layer(mlp.InputLayer(4, activation_function='relu'))
     nn.add_layer(mlp.PerceptronLayer(2, activation_function='relu'))
     nn.add_layer(mlp.PerceptronLayer(2, activation_function='relu'))

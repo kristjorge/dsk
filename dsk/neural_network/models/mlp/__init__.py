@@ -1,1 +1,1 @@
-from .mlp import Sequential
+from .mlp import MLP

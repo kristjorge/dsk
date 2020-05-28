@@ -22,16 +22,23 @@ class PerceptronLayer:
         self.layer_no = layer_no
         self.z = np.random.normal(mean, stdev, (self.size, 1))
         self.b = np.random.normal(mean, stdev, (self.size, 1))
-        self.w = np.random.normal(mean, stdev, (self.size, self.previous_layer.size))
         self.h = self.activation_function(self.z + self.b)
+
+        if self.layer_no > 0:
+            self.w = np.random.normal(mean, stdev, (self.size, self.previous_layer.size))
 
     def reset_gradients(self):
-        self._bias_gradients = []
-        self._weight_gradients = []
+        if hasattr(self, 'b'):
+            self._bias_gradients = []
+        if hasattr(self, 'w'):
+            self._weight_gradients = []
 
     def forward_propagation(self):
-        self.z = np.dot(self.w, self.previous_layer.h)
-        self.h = self.activation_function(self.z + self.b)
+        if self.layer_no > 0:
+            self.z = np.dot(self.w, self.previous_layer.h)
+            self.h = self.activation_function(self.z + self.b)
+        else:
+            pass
 
     def backward_propagation(self):
         self.error = np.dot(self.next_layer.w.T, self.next_layer.error)
@@ -79,27 +86,10 @@ class InputLayer(PerceptronLayer):
         self.z = z
         self.h = self.activation_function(self.z + self.b)
 
-    def initialise(self, network, layer_no, mean=0, stdev=1):
-        self.network = network
-        self.layer_no = layer_no
-        self.z = np.random.normal(0, 1, (self.size, 1))
-        self.b = np.random.normal(0, 1, (self.size, 1))
-        self.h = self.activation_function(self.z + self.b)
-
-    def reset_gradients(self):
-        self._bias_gradients = []
-
-    def forward_propagation(self):
-        pass
-
     def backward_propagation(self):
         self.error = np.dot(self.next_layer.w.T, self.next_layer.error)
         self.error = np.multiply(self.error, self.activation_function(self.z, derivative=True))
         self._bias_gradients.append(self.error)
-
-    @property
-    def next_layer(self):
-        return self.network.layers[self.layer_no + 1]
 
 
 class OutputLayer(PerceptronLayer):
@@ -115,10 +105,6 @@ class OutputLayer(PerceptronLayer):
 
     @property
     def total_error(self):
-        return np.sum(self.network.cost_function(self.h, self.target_output, derivative=False))
-
-    @property
-    def previous_layer(self):
-        return self.network.layers[self.layer_no - 1]
+        return self.network.cost_function(self.h, self.target_output, derivative=False, total=True)
 
 
