@@ -11,8 +11,10 @@ class PerceptronLayer:
         self.layer_no = None
         self._weight_gradients = []
         self._bias_gradients = []
+        self._weights = []
+        self._biases = []
         self.z = None
-        self.h = None
+        # self.h = None
         self.b = None
         self.w = None
         self.error = None
@@ -22,7 +24,6 @@ class PerceptronLayer:
         self.layer_no = layer_no
         self.z = np.random.normal(mean, stdev, (self.size, 1))
         self.b = np.random.normal(mean, stdev, (self.size, 1))
-        self.h = self.activation_function(self.z + self.b)
 
         if self.layer_no > 0:
             self.w = np.random.normal(mean, stdev, (self.size, self.previous_layer.size))
@@ -36,7 +37,6 @@ class PerceptronLayer:
     def forward_propagation(self):
         if self.layer_no > 0:
             self.z = np.dot(self.w, self.previous_layer.h)
-            self.h = self.activation_function(self.z + self.b)
         else:
             pass
 
@@ -48,18 +48,24 @@ class PerceptronLayer:
 
     def adjust_with_gradients(self):
         if hasattr(self, 'b'):
-            b = np.zeros(self.b.shape)
+            db = np.zeros(self.b.shape)
             for grad in self._bias_gradients:
-                b = np.add(b, grad)
-            b = b / len(self._bias_gradients)
-            self.b -= self.network.learning_rate * b
+                db = np.add(db, grad)
+            db = db / len(self._bias_gradients)
+            self._biases.append(self.b.copy())
+            self.b -= self.network.learning_rate * db
 
         if hasattr(self, 'w'):
-            w = np.zeros(self.w.shape)
+            dw = np.zeros(self.w.shape)
             for grad in self._weight_gradients:
-                w = np.add(w, grad)
-            w = w / len(self._weight_gradients)
-            self.w -= self.network.learning_rate * w
+                dw = np.add(dw, grad)
+            dw = dw / len(self._weight_gradients)
+            self._weights.append(self.w.copy())
+            self.w -= self.network.learning_rate * dw
+
+    @property
+    def h(self):
+        return self.activation_function(self.z + self.b)
 
     @property
     def previous_layer(self):
@@ -84,7 +90,6 @@ class InputLayer(PerceptronLayer):
 
     def set_input_activations(self, z):
         self.z = z
-        self.h = self.activation_function(self.z + self.b)
 
     def backward_propagation(self):
         self.error = np.dot(self.next_layer.w.T, self.next_layer.error)

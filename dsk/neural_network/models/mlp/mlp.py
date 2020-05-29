@@ -33,9 +33,7 @@ class MLP:
         self.average_costs = []
         self.learning_rate = learning_rate
         self.cost_function = None
-        self.all_costs = []
         self.layers = []
-        self.progress_bar = None
         if cost_function == 'mse':
             self.cost_function = mse
         else:
@@ -97,7 +95,6 @@ class MLP:
             layer.initialise(self, layer_no)
 
     def compute_avg_costs(self, costs):
-        self.all_costs.append(costs)
         self.average_costs.append(sum(costs) / len(costs))
 
     def train(self, x_train, y_train, epochs):
@@ -107,7 +104,7 @@ class MLP:
             quit('Model needs to have an input layer and output layer to work\nQuitting...')
 
         self.initialise(x_train, y_train)
-        self.progress_bar = ProgressBar(epochs)
+        progress_bar_epochs = ProgressBar(epochs)
         for _ in range(epochs):
             self.reset_gradients()
             costs = []
@@ -117,21 +114,18 @@ class MLP:
                 self.backward_pass()
             self.compute_avg_costs(costs)
             self.adjust_weights_and_biases()
-            self.progress_bar.update()
+            progress_bar_epochs.update()
 
     def predict(self, a):
-        # If list, make it an np.array and reshape to a column vector
-        if type(a) == list:
-            a = np.array(a).reshape(-1, 1)
-
         # If an np.ndarray with no shape = (x,), the reshape to column vector
-        elif type(a) == np.ndarray and len(a.shape) == 1:
+        if type(a) == np.ndarray and len(a.shape) == 1:
             a = a.reshape(-1, 1)
 
         self.input_layer.set_input_activations(a)
         for layer in self.layers:
             layer.forward_propagation()
 
+        ans = self.output_layer.h
         return self.output_layer.h
 
     def reset_gradients(self):
@@ -141,7 +135,7 @@ class MLP:
     def forward_pass(self, training_sample_no):
 
         training_input = self.x_train[training_sample_no, :]
-        training_output = self.y_train[training_sample_no]
+        training_output = self.y_train[training_sample_no, :]
         if type(training_input) == list:
             training_input = np.array(training_input).reshape(-1, 1)
         elif type(training_input) == np.ndarray and len(training_input.shape) == 1:

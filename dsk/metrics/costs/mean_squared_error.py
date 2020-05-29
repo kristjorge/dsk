@@ -3,14 +3,15 @@ import numpy as np
 
 def mse(output, label, derivative=False, total=False):
 
-    if not derivative:
-        value = 0.5 * (output - label) ** 2
-        if not total:
-            return value
-        else:
-            value = np.sum(value)
-        return value
-
+    if derivative:
+        value = output - label
     else:
-        return output - label
+        value = 0.5 * (output - label) ** 2
+
+    if total:
+        value = np.sum(value)
+    else:
+        pass
+    return value
+
 
