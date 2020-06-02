@@ -14,19 +14,18 @@ class PerceptronLayer:
         self._weights = []
         self._biases = []
         self.z = None
-        # self.h = None
         self.b = None
         self.w = None
         self.error = None
 
-    def initialise(self, network, layer_no, mean=0, stdev=1):
+    def initialise(self, network, layer_no, initializer):
         self.network = network
         self.layer_no = layer_no
-        self.z = np.random.normal(mean, stdev, (self.size, 1))
-        self.b = np.random.normal(mean, stdev, (self.size, 1))
+        self.z = np.ones((self.size, 1))
+        self.b = initializer(self).init_b()
 
         if self.layer_no > 0:
-            self.w = np.random.normal(mean, stdev, (self.size, self.previous_layer.size))
+            self.w = initializer(self).init_w()
 
     def reset_gradients(self):
         if hasattr(self, 'b'):

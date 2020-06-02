@@ -1,5 +1,6 @@
 from dsk.metrics.costs import mse
 import dsk.neural_network.layers.layers as mlp_layers
+from dsk.neural_network.initialization.initializer import RandomInitializer
 from dsk.utils.progress_bar import ProgressBar
 import numpy as np
 
@@ -10,35 +11,28 @@ class MLP:
     Attributes:
         x_train:            List of training examples
         y_train:            List of training labels
-        cost:               Calculated cost for one training example. Returned as a list where cost[0] is the total
-                            cost, and cost[1] is the error array
-        del_cost:           Derivative of the cost function at the output layer
         learning_rate:      The specified learning rate which is multiplied with the gradients to update the weights
                             and biases
         layers:             The different layers in the network
 
     """
 
-    def __init__(self, learning_rate=0.01, cost_function='mse'):
+    def __init__(self, learning_rate=0.01, cost_function=mse, initialisation=RandomInitializer):
 
         """
-
         :param learning_rate: Learning rate used in gradient descent to update weights and biases
         :param cost_function: Which cost function should be used in computing costs. Currently only MSE is
         implemented
         """
 
-        self.x_train = None
+        self.X_train = None
         self.y_train = None
         self.average_costs = []
         self.learning_rate = learning_rate
         self.cost_function = None
         self.layers = []
-        if cost_function == 'mse':
-            self.cost_function = mse
-        else:
-            print("No other cost function yet implemented..\nSetting it to 'mse'")
-            self.cost_function = mse
+        self.cost_function = cost_function
+        self._initializer = initialisation
 
     def __len__(self):
         return len(self.layers)
@@ -75,10 +69,10 @@ class MLP:
             else:
                 self.layers.append(layer)
 
-    def initialise(self, x_train, y_train):
+    def initialise(self, X_train, y_train):
 
         """
-        :param x_train: List of training examples
+        :param X_train: List of training examples
         :param y_train: List of training labels
         :param cost_function: Input cost function used in training
         :return: Nothing
@@ -86,16 +80,22 @@ class MLP:
         Also runs the initialise method on the layers which runs the initialise method on the Neurons in the layers
         """
 
-        self.x_train = x_train
-        self.y_train = y_train
-        assert len(self.x_train) == len(self.y_train), \
-            "Training features and labels should be the same length\nQuitting..."
+        # Forcing x_train and y_train to be 2D matrices
+        if X_train.ndim == 1:
+            self.X_train = X_train.reshape(-1, 1)
+        else:
+            self.X_train = X_train
+
+        if y_train.ndim == 1:
+            self.y_train = y_train.reshape(-1, 1)
+        else:
+            self.y_train = y_train
+
+        if len(self.X_train) != len(self.y_train):
+            quit("Training features and labels should be the same length\nQuitting...")
 
         for layer_no, layer in enumerate(self.layers):
-            layer.initialise(self, layer_no)
-
-    def compute_avg_costs(self, costs):
-        self.average_costs.append(sum(costs) / len(costs))
+            layer.initialise(self, layer_no, self._initializer)
 
     def train(self, x_train, y_train, epochs):
 
@@ -108,24 +108,22 @@ class MLP:
         for _ in range(epochs):
             self.reset_gradients()
             costs = []
-            for i in range(self.x_train.shape[0]):
+            for i in range(self.X_train.shape[0]):
                 self.forward_pass(i)
                 costs.append(self.output_layer.total_error)
                 self.backward_pass()
-            self.compute_avg_costs(costs)
+            self.average_costs.append(sum(costs) / len(costs))
             self.adjust_weights_and_biases()
             progress_bar_epochs.update()
 
     def predict(self, a):
-        # If an np.ndarray with no shape = (x,), the reshape to column vector
-        if type(a) == np.ndarray and len(a.shape) == 1:
+        if type(a) == np.ndarray and a.ndim == 1:
             a = a.reshape(-1, 1)
 
         self.input_layer.set_input_activations(a)
         for layer in self.layers:
             layer.forward_propagation()
 
-        ans = self.output_layer.h
         return self.output_layer.h
 
     def reset_gradients(self):
@@ -134,7 +132,7 @@ class MLP:
 
     def forward_pass(self, training_sample_no):
 
-        training_input = self.x_train[training_sample_no, :]
+        training_input = self.X_train[training_sample_no, :]
         training_output = self.y_train[training_sample_no, :]
         if type(training_input) == list:
             training_input = np.array(training_input).reshape(-1, 1)
