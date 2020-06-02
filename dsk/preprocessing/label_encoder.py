@@ -6,19 +6,16 @@ class LabelEncoder:
     def __init__(self, method='regular'):
         self.labels = []
         self.method = method
-        self.y = None
 
     def fit(self, y):
-        self.y = y
-
         distinct_label_counter = 0
-        for label in self.y:
+        for label in y:
             if label not in self._all_distinct_labels:
                 self.labels.append(Label(label, distinct_label_counter))
                 distinct_label_counter += 1
 
-    def transform(self):
-        encoded = np.array([self._encode(label) for label in self.y])
+    def transform(self, y):
+        encoded = np.array([self._encode(label) for label in y])
         if self.method == 'normalized':
             for label in self.labels:
                 label.encoded_value /= max(encoded)
@@ -29,12 +26,11 @@ class LabelEncoder:
         else:
             quit('Not a valid encoding method')
 
-        self.y = encoded
-        return self.y
+        return encoded
 
-    def inverse_transform(self):
-        self.y = np.array([self._decode(label) for label in self.y])
-        return self.y
+    def inverse_transform(self, y):
+        decoded = np.array([self._decode(label) for label in y])
+        return decoded
 
     def _encode(self, decoded_label):
         return [label.encoded_value for label in self.labels if label.decoded_value == decoded_label][0]

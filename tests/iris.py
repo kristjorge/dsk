@@ -12,21 +12,28 @@ from matplotlib import pyplot as plt
 def main():
     X = iris.iloc[:, 1:5].values
     y = iris.iloc[:, -1].values
+    one_hot = preprocessing.OneHotEncoder()
     le = preprocessing.LabelEncoder()
     le.fit(y)
-    y = le.transform()
+    y = le.transform(y)
+    one_hot.fit(y, [0])
+    y = one_hot.transform(y)
+
+    y = one_hot.inverse_transform(y)
+    y = le.inverse_transform(y)
+
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
     nn = mlp.MLP(cost_function=cross_entropy, learning_rate=0.15, initialisation=XavierInitializer)
     nn.add_layer(layers.InputLayer(4, activation_function='linear'))
-    nn.add_layer(layers.PerceptronLayer(10, activation_function='tanh'))
-    nn.add_layer(layers.PerceptronLayer(10, activation_function='tanh'))
-    nn.add_layer(layers.PerceptronLayer(10, activation_function='tanh'))
-    nn.add_layer(layers.PerceptronLayer(10, activation_function='tanh'))
-    nn.add_layer(layers.PerceptronLayer(10, activation_function='tanh'))
-    nn.add_layer(layers.OutputLayer(4, activation_function='sigmoid'))
-    nn.train(X_train, y_train, epochs=200)
+    nn.add_layer(layers.PerceptronLayer(10, activation_function='relu'))
+    nn.add_layer(layers.PerceptronLayer(10, activation_function='relu'))
+    nn.add_layer(layers.PerceptronLayer(10, activation_function='relu'))
+    nn.add_layer(layers.PerceptronLayer(10, activation_function='relu'))
+    nn.add_layer(layers.PerceptronLayer(10, activation_function='relu'))
+    nn.add_layer(layers.OutputLayer(3, activation_function='sigmoid'))
+    nn.train(X_train, y_train, epochs=1)
 
     # plt.plot(nn.costs)
     # plt.show()
@@ -35,6 +42,9 @@ def main():
         prediction = nn.predict(x_row)
         print('Input activations: {}'.format(x_row))
         print('Prediction: {}'.format(prediction))
+        labeled_prediction = one_hot.inverse_transform(prediction)
+        label = le.inverse_transform(labeled_prediction)
+        print('Prediction label: {}'.format(label))
         print('Test label: {}'.format(y_row))
         print('------- ------- ------- ------')
 
