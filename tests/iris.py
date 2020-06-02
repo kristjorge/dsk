@@ -2,18 +2,16 @@ import numpy as np
 from dsk.data_sets import iris
 from dsk.neural_network.models import mlp
 from dsk.neural_network.layers import layers
-from dsk import preprocessing
-from dsk.preprocessing import train_test_split
+from dsk.preprocessing import encoding, feature_scaling, model_selection
 from dsk.neural_network.initialization.initializer import XavierInitializer
 from dsk.metrics.costs import mse, cross_entropy
-from matplotlib import pyplot as plt
 
 
 def main():
     X = iris.iloc[:, 1:5].values
     y = iris.iloc[:, -1].values
-    one_hot = preprocessing.OneHotEncoder()
-    le = preprocessing.LabelEncoder()
+    one_hot = encoding.OneHotEncoder()
+    le = encoding.LabelEncoder()
     le.fit(y)
     y = le.transform(y)
     one_hot.fit(y, [0])
@@ -23,7 +21,7 @@ def main():
     y = le.inverse_transform(y)
 
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+    X_train, X_test, y_train, y_test = model_selection.train_test_split(X, y, test_size=0.2)
 
     nn = mlp.MLP(cost_function=cross_entropy, learning_rate=0.15, initialisation=XavierInitializer)
     nn.add_layer(layers.InputLayer(4, activation_function='linear'))
