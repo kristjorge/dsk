@@ -1,1 +1,2 @@
-from .min_max_scaler import MinMaxScaler
+from .normalizer import Normalizer
+from .standardizer import Standardizer

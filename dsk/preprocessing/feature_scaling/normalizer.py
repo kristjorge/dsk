@@ -1,7 +1,7 @@
 import numpy as np
 
 
-class MinMaxScaler:
+class Normalizer:
 
     def __init__(self):
         self.scaled_features = {}
