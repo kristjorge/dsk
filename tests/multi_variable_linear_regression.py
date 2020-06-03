@@ -1,24 +1,35 @@
 import numpy as np
 from matplotlib import pyplot as plt
 import dsk.linear_model as linmod
+from dsk.data_sets import two_variable_linear_model
 
 
 def main():
-    X = np.array([[np.random.random()] for _ in range(50)])
-    y = np.array([x + np.random.random() for x in X[:, 0]])
+    X = two_variable_linear_model.iloc[:, :2].values
+    y = two_variable_linear_model.iloc[:, 2].values
 
-    linear_regression = linmod.LinearRegression(learning_rate=0.1, epochs=500)
+    linear_regression = linmod.LinearRegression(learning_rate=0.05, epochs=200)
     linear_regression.fit(X, y)
 
     a = linear_regression.coefficients[0].value
     b = linear_regression.coefficients[1].value
-    f = np.vectorize(lambda x: a*x + b)
-    plt.scatter(X[:, 0], y, c='r')
-    plt.plot(np.arange(-5, 5, 0.1), f(np.arange(-5,5,0.1)))
-    plt.show()
+    c = linear_regression.coefficients[2].value
+    f = np.vectorize(lambda x, y: a*x + b*y + c)
 
-    prediction = linear_regression.predict(np.array([-3]))
-    print(prediction)
+    plt.figure()
+    plt.subplot(221)
+    plt.plot(linear_regression.coefficients[0].log)
+    plt.title('A')
+    plt.subplot(222)
+    plt.plot(linear_regression.coefficients[1].log)
+    plt.title('B')
+    plt.subplot(223)
+    plt.plot(linear_regression.coefficients[2].log)
+    plt.title('Intercept')
+    plt.subplot(224)
+    plt.plot(linear_regression.loss)
+    plt.title('Loss')
+    plt.show()
 
 
 if __name__ == '__main__':

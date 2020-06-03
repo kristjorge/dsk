@@ -5,20 +5,23 @@ from dsk.neural_network.layers import layers
 from dsk.preprocessing import encoding, feature_scaling, model_selection
 from dsk.neural_network.initialization.initializer import XavierInitializer
 from dsk.metrics.costs import mse, cross_entropy
+from dsk.preprocessing.feature_scaling import Normalizer
 
 
 def main():
-    X = iris.iloc[:, 1:5].values
-    y = iris.iloc[:, -1].values
+
     one_hot = encoding.OneHotEncoder()
     le = encoding.LabelEncoder()
+    norm = Normalizer()
+
+    X = iris.iloc[:, 1:5].values
+    y = iris.iloc[:, -1].values
     le.fit(y)
     y = le.transform(y)
     one_hot.fit(y, [0])
     y = one_hot.transform(y)
-
-    y = one_hot.inverse_transform(y)
-    y = le.inverse_transform(y)
+    norm.fit(X)
+    X = norm.transform(X)
 
 
     X_train, X_test, y_train, y_test = model_selection.train_test_split(X, y, test_size=0.2)
@@ -33,17 +36,18 @@ def main():
     nn.add_layer(layers.OutputLayer(3, activation_function='sigmoid'))
     nn.train(X_train, y_train, epochs=1)
 
-    # plt.plot(nn.costs)
-    # plt.show()
-
+    predictions = []
+    predictions_labeled = []
     for x_row, y_row in zip(X_test, y_test):
-        prediction = nn.predict(x_row)
-        print('Input activations: {}'.format(x_row))
-        print('Prediction: {}'.format(prediction))
-        labeled_prediction = one_hot.inverse_transform(prediction)
-        label = le.inverse_transform(labeled_prediction)
+        predictions.append(nn.predict(x_row).T)
+        label = one_hot.inverse_transform(predictions[-1])
+        predictions_labeled.append(le.inverse_transform(label))
+
+    for label, pred, x, y in zip(predictions_labeled, predictions, X_test, y_test):
+        print('Input activations: {}'.format(x))
+        print('Prediction: {}'.format(pred))
         print('Prediction label: {}'.format(label))
-        print('Test label: {}'.format(y_row))
+        print('Test label: {}'.format(y))
         print('------- ------- ------- ------')
 
 
