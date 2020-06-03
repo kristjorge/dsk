@@ -1,4 +1,4 @@
-from dsk.neural_network.models import mlp
+from dsk.neural_network.models import feed_forward
 from dsk.neural_network.layers import layers
 from dsk.metrics.costs import mse
 from dsk.neural_network.initialization.initializer import XavierInitializer
@@ -15,13 +15,13 @@ def main():
     X_train, X_test, y_train, y_test = train_test_split(X, y)
 
     # np.random.seed(0)
-    nn = mlp.MLP(cost_function=mse, learning_rate=0.15, initialisation=XavierInitializer)
+    nn = feed_forward.FeedForward(cost_function=mse, learning_rate=0.15, initialisation=XavierInitializer)
     nn.add_layer(layers.InputLayer(1, activation_function='linear'))
-    nn.add_layer(layers.PerceptronLayer(10, activation_function='tanh'))
-    nn.add_layer(layers.PerceptronLayer(10, activation_function='tanh'))
-    nn.add_layer(layers.PerceptronLayer(10, activation_function='tanh'))
-    nn.add_layer(layers.PerceptronLayer(10, activation_function='tanh'))
-    nn.add_layer(layers.PerceptronLayer(10, activation_function='tanh'))
+    nn.add_layer(layers.FullyConnectedLayer(10, activation_function='tanh'))
+    nn.add_layer(layers.FullyConnectedLayer(10, activation_function='tanh'))
+    nn.add_layer(layers.FullyConnectedLayer(10, activation_function='tanh'))
+    nn.add_layer(layers.FullyConnectedLayer(10, activation_function='tanh'))
+    nn.add_layer(layers.FullyConnectedLayer(10, activation_function='tanh'))
     nn.add_layer(layers.OutputLayer(1, activation_function='linear'))
     nn.train(X_train, y_train, epochs=200)
 

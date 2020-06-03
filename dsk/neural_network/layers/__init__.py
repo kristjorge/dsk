@@ -1,1 +1,1 @@
-from .layers import PerceptronLayer, OutputLayer, InputLayer
+from .layers import FullyConnectedLayer, OutputLayer, InputLayer

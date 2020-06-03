@@ -5,7 +5,7 @@ from dsk.utils.progress_bar import ProgressBar
 import numpy as np
 
 
-class MLP:
+class FeedForward:
 
     """
     Attributes:
@@ -48,7 +48,7 @@ class MLP:
     def add_layer(self, layer):
 
         """
-        Adds a new layer to the mlp model.
+        Adds a new layer to the feed_forward model.
 
         If the layer is of type InputLayer, place it at the start
         If the layer is of type OutputLayer, place it at the end

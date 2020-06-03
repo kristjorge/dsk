@@ -2,7 +2,7 @@ from dsk.neural_network.activation_functions import get_activation_function
 import numpy as np
 
 
-class PerceptronLayer:
+class FullyConnectedLayer:
 
     def __init__(self, size, activation_function='relu'):
         self.activation_function = get_activation_function(activation_function)
@@ -82,7 +82,7 @@ class PerceptronLayer:
             pass
 
 
-class InputLayer(PerceptronLayer):
+class InputLayer(FullyConnectedLayer):
 
     def __init__(self, size, activation_function='linear'):
         super().__init__(size, activation_function)
@@ -100,7 +100,7 @@ class InputLayer(PerceptronLayer):
         return self.activation_function(self.z)
 
 
-class OutputLayer(PerceptronLayer):
+class OutputLayer(FullyConnectedLayer):
     def __init__(self, size, activation_function='relu'):
         super().__init__(size, activation_function)
         self.target_output = None
