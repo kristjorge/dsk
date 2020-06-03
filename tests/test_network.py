@@ -2,7 +2,7 @@ from dsk.neural_network.models import mlp
 from dsk.neural_network.layers import layers
 from dsk.metrics.costs import mse
 from dsk.neural_network.initialization.initializer import XavierInitializer
-from dsk.preprocessing import train_test_split
+from dsk.preprocessing.model_selection import train_test_split
 from matplotlib import pyplot as plt
 from dsk.data_sets import simple_set_200 as data_set
 

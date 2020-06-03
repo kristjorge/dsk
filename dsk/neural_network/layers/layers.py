@@ -22,9 +22,10 @@ class PerceptronLayer:
         self.network = network
         self.layer_no = layer_no
         self.z = np.ones((self.size, 1))
-        self.b = initializer(self).init_b()
+        if hasattr(self, 'b'):
+            self.b = initializer(self).init_b()
 
-        if self.layer_no > 0:
+        if hasattr(self, 'w'):
             self.w = initializer(self).init_w()
 
     def reset_gradients(self):
@@ -86,14 +87,17 @@ class InputLayer(PerceptronLayer):
     def __init__(self, size, activation_function='linear'):
         super().__init__(size, activation_function)
         del self.w
+        del self.b
 
     def set_input_activations(self, z):
         self.z = z
 
     def backward_propagation(self):
-        self.error = np.dot(self.next_layer.w.T, self.next_layer.error)
-        self.error = np.multiply(self.error, self.activation_function(self.z, derivative=True))
-        self._bias_gradients.append(self.error)
+        pass
+
+    @property
+    def h(self):
+        return self.activation_function(self.z)
 
 
 class OutputLayer(PerceptronLayer):
