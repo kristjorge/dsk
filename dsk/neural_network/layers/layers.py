@@ -1,11 +1,11 @@
-from dsk.neural_network.activation_functions import get_activation_function
+from dsk.neural_network.activation.activation_functions import relu, linear
 import numpy as np
 
 
 class FullyConnectedLayer:
 
-    def __init__(self, size, activation_function='relu'):
-        self.activation_function = get_activation_function(activation_function)
+    def __init__(self, size, activation_function=relu):
+        self.activation_function = np.vectorize(activation_function)
         self.size = size
         self.network = None
         self.layer_no = None
@@ -84,7 +84,7 @@ class FullyConnectedLayer:
 
 class InputLayer(FullyConnectedLayer):
 
-    def __init__(self, size, activation_function='linear'):
+    def __init__(self, size, activation_function=linear):
         super().__init__(size, activation_function)
         del self.w
         del self.b
@@ -101,7 +101,7 @@ class InputLayer(FullyConnectedLayer):
 
 
 class OutputLayer(FullyConnectedLayer):
-    def __init__(self, size, activation_function='relu'):
+    def __init__(self, size, activation_function=relu):
         super().__init__(size, activation_function)
         self.target_output = None
 

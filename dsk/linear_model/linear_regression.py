@@ -8,13 +8,14 @@ class LinearRegression:
     def __init__(self, epochs=50, learning_rate=0.1):
         self._epochs = epochs
         self._lr = learning_rate
+        self._mini_batch_size = None
         self.coefficients = []
         self.loss = []
         self.loss_function = dsk.metrics.costs.mse
         self.features = []
         self.R = None
 
-    def fit(self, X, y):
+    def fit(self, X, y, mini_batch_size=None):
         """
         Fits coefficients in a multivariate linear expression to fit the training data. The number of variables is
         inferred from the dimensions of the X matrix provided in the training set
@@ -22,6 +23,8 @@ class LinearRegression:
         :param y:
         :return:
         """
+
+        self._mini_batch_size = mini_batch_size
 
         # Transforming X to an m x n matrix
         if X.ndim == 1:
@@ -39,21 +42,30 @@ class LinearRegression:
         # Intercept
         self.coefficients.append(RegressionCoefficient())
 
+        if self._mini_batch_size:
+            batches = None
+        else:
+             batches = [self.features]
+
         for _ in range(self._epochs):
-            # Calculate function value
 
-            f = self._calc_expression(self.features)
-            self.loss.append(self.loss_function(f, y, total=True))
+            # If mini batch is provided, get a subset of the total features matrix. If not, use self.features
 
-            # Updating coefficients
-            for idx, c in enumerate(self.coefficients):
-                self.coefficients[idx].log.append(self.coefficients[idx].value)
-                if idx == len(self.coefficients)-1:
-                    gradient = self._lr * np.mean(self.loss_function(f, y, derivative=True))
-                else:
-                    gradient = self._lr * np.mean(np.multiply(self.features[idx], self.loss_function(f, y, derivative=True)))
-                self.coefficients[idx].value -= gradient
-                self.coefficients[idx].gradients.append(gradient)
+            for batch_no, features in enumerate(batches):
+                print("Batch number: {}".format(batch_no))
+                # Calculate function value
+                f = self._calc_expression(features)
+                self.loss.append(self.loss_function(f, y, total=True))
+
+                # Updating coefficients
+                for idx, c in enumerate(self.coefficients):
+                    self.coefficients[idx].log.append(self.coefficients[idx].value)
+                    if idx == len(self.coefficients)-1:
+                        gradient = self._lr * np.mean(self.loss_function(f, y, derivative=True))
+                    else:
+                        gradient = self._lr * np.mean(np.multiply(X[:, idx].reshape(-1, 1), self.loss_function(f, y, derivative=True)))
+                    self.coefficients[idx].value -= gradient
+                    self.coefficients[idx].gradients.append(gradient)
 
         f_fitted = self.predict(X)
         self.R = dsk.metrics.r_squared(y, f_fitted)
@@ -81,6 +93,10 @@ class LinearRegression:
             if idx < len(self.coefficients) - 1:
                 f += c.value * features[idx]
         return f
+
+    def _sample_batches(self):
+        pass
+
 
 
 class RegressionCoefficient:

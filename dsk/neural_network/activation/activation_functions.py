@@ -1,19 +1,18 @@
 import math as m
-import numpy as np
 
 
-def get_activation_function(activation_function):
-    if activation_function == 'linear':
-        return np.vectorize(linear)
-
-    elif activation_function == 'sigmoid':
-        return np.vectorize(sigmoid)
-
-    elif activation_function == 'relu':
-        return np.vectorize(relu)
-
-    elif activation_function == 'tanh':
-        return np.vectorize(tanh)
+def leaky_relu(activation, derivative=False):
+    factor = 0.01
+    if not derivative:
+        if activation > 0:
+            return activation
+        else:
+            return factor*activation
+    else:
+        if activation > 0:
+            return 1
+        else:
+            return factor
 
 
 def relu(activation, derivative=False):
@@ -27,7 +26,7 @@ def relu(activation, derivative=False):
 
 
 def sigmoid(activation, derivative=False):
-    transformation = 1 / (1 + m.exp(-activation))
+    transformation = 1. / (1 + m.exp(-activation))
     if not derivative:
         return transformation
     else:
@@ -35,8 +34,7 @@ def sigmoid(activation, derivative=False):
 
 
 def tanh(activation, derivative=False):
-    # transformation = (m.exp(activation) - m.exp(-activation)) / (m.exp(activation) + m.exp(-activation))
-    transformation = 2 / (1 + m.exp(-2*activation)) - 1
+    transformation = 2. / (1 + m.exp(-2*activation)) - 1
     if not derivative:
         return transformation
     else:
@@ -56,4 +54,5 @@ def linear(activation, derivative=False):
         return activation
     else:
         return 1
+
 
