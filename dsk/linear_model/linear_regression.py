@@ -72,7 +72,7 @@ class LinearRegression:
             X = X.reshape(-1, 1)
 
         if X.shape[1] + 1 != len(self.coefficients):
-            quit('Dimensions do not align')
+            quit('Dimensions do not match the model')
 
         # Calculate function value
         f = self._calc_expression(X)
@@ -97,15 +97,13 @@ class LinearRegression:
             self.coefficients[idx].gradients.append(gradient)
 
     def _sample_batches(self, X, y):
-        X_shuffled = X.copy()
-        y_shuffled = y.copy()
-        X_shuffled, y_shuffled = shuffle(X_shuffled, y_shuffled)
-
+        X_shuffled, y_shuffled = shuffle(X.copy(), y.copy())
         num_batches = m.floor(X.shape[0] / self._mini_batch_size)
         X_batches = [np.array(X_shuffled[i:i+self._mini_batch_size, :]) for i in range(num_batches)]
         y_batches = [np.array(y_shuffled[i:i+self._mini_batch_size, :]) for i in range(num_batches)]
 
         return X_batches, y_batches
+
 
 class RegressionCoefficient:
 

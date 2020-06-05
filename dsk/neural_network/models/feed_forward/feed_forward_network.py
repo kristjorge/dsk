@@ -1,5 +1,5 @@
 from dsk.metrics.costs import mse
-import dsk.neural_network.layers.layers as mlp_layers
+from dsk.neural_network import layers as nn_layers
 from dsk.neural_network.initialization.initializer import RandomInitializer
 from dsk.utils.progress_bar import ProgressBar
 import numpy as np
@@ -59,12 +59,12 @@ class FeedForward:
         :return:
         """
 
-        if type(layer) == mlp_layers.InputLayer:
+        if type(layer) == nn_layers.InputLayer:
             self.layers.insert(0, layer)
-        elif type(layer) == mlp_layers.OutputLayer:
+        elif type(layer) == nn_layers.OutputLayer:
             self.layers.insert(len(self.layers), layer)
         else:
-            if type(self.layers[-1]) == mlp_layers.OutputLayer:  # If there is an Output layer
+            if type(self.layers[-1]) == nn_layers.OutputLayer:  # If there is an Output layer
                 self.layers.insert(-1, layer)
             else:
                 self.layers.append(layer)
@@ -100,7 +100,7 @@ class FeedForward:
     def train(self, x_train, y_train, epochs):
 
         # Check if first layer is an InputLayer and last layer is an OutputLayer
-        if not type(self.layers[0]) == mlp_layers.InputLayer or not type(self.layers[-1]) == mlp_layers.OutputLayer:
+        if not type(self.layers[0]) == nn_layers.InputLayer or not type(self.layers[-1]) == nn_layers.OutputLayer:
             quit('Model needs to have an input layer and output layer to work\nQuitting...')
 
         self.initialise(x_train, y_train)
