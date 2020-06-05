@@ -8,13 +8,18 @@ def main():
     X = two_variable_linear_model.iloc[:, :2].values
     y = two_variable_linear_model.iloc[:, 2].values
 
-    linear_regression = linmod.LinearRegression(learning_rate=0.05, epochs=200)
-    linear_regression.fit(X, y, mini_batch_size=2)
+    linear_regression = linmod.LinearRegression(learning_rate=0.05, epochs=1)
+    linear_regression.fit(X, y, mini_batch_size=1)
 
     a = linear_regression.coefficients[0].value
     b = linear_regression.coefficients[1].value
     c = linear_regression.coefficients[2].value
     f = np.vectorize(lambda x, y: a*x + b*y + c)
+
+    print('a: {}'.format(a))
+    print('b: {}'.format(b))
+    print('c: {}'.format(c))
+    print('R squared: {}'.format(linear_regression.R))
 
     plt.figure()
     plt.subplot(221)

@@ -23,4 +23,9 @@ def shuffle(*args, axis=0):
                 except IndexError:
                     new_ind.append(args[new_ind_idx][idx])
 
-    return [s for s in shuffled]
+
+    final_shuffled = []
+    for new_ind in shuffled:
+        final_shuffled.append(np.array([new_ind[i] for i in range(len(new_ind))]))
+
+    return final_shuffled

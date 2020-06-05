@@ -1,6 +1,8 @@
 import dsk.metrics
 import dsk.metrics.costs
+from dsk.preprocessing.model_selection import shuffle
 import numpy as np
+import math as m
 
 
 class LinearRegression:
@@ -36,6 +38,7 @@ class LinearRegression:
         if y.ndim == 1:
             y = y.reshape(-1, 1)
 
+        # Coefficients
         for feature_no in range(len(self.features)):
             self.coefficients.append(RegressionCoefficient())
 
@@ -43,29 +46,22 @@ class LinearRegression:
         self.coefficients.append(RegressionCoefficient())
 
         if self._mini_batch_size:
-            batches = None
+            features_batches, label_batches = self._sample_batches(X, y)
         else:
-             batches = [self.features]
+             features_batches, label_batches = [X], [y]
 
         for _ in range(self._epochs):
 
             # If mini batch is provided, get a subset of the total features matrix. If not, use self.features
-
-            for batch_no, features in enumerate(batches):
-                print("Batch number: {}".format(batch_no))
+            for batch_no, (features, labels) in enumerate(zip(features_batches, label_batches)):
                 # Calculate function value
                 f = self._calc_expression(features)
-                self.loss.append(self.loss_function(f, y, total=True))
+
+                # Store the loss value
+                self.loss.append(self.loss_function(f, labels, total=True))
 
                 # Updating coefficients
-                for idx, c in enumerate(self.coefficients):
-                    self.coefficients[idx].log.append(self.coefficients[idx].value)
-                    if idx == len(self.coefficients)-1:
-                        gradient = self._lr * np.mean(self.loss_function(f, y, derivative=True))
-                    else:
-                        gradient = self._lr * np.mean(np.multiply(X[:, idx].reshape(-1, 1), self.loss_function(f, y, derivative=True)))
-                    self.coefficients[idx].value -= gradient
-                    self.coefficients[idx].gradients.append(gradient)
+                self._update_with_gradients(f, features, labels)
 
         f_fitted = self.predict(X)
         self.R = dsk.metrics.r_squared(y, f_fitted)
@@ -73,17 +69,13 @@ class LinearRegression:
     def predict(self, X):
 
         if X.ndim == 1:
-            features = [(X.reshape(-1, 1))]
-            if len(features) + 1 != len(self.coefficients):
-                quit('Dimensions do not align')
-        else:
-            features = [X[:, col].reshape(-1, 1) for col in range(X.shape[1])]
+            X = X.reshape(-1, 1)
 
-        if len(features) + 1 != len(self.coefficients):
+        if X.shape[1] + 1 != len(self.coefficients):
             quit('Dimensions do not align')
 
         # Calculate function value
-        f = self._calc_expression(features)
+        f = self._calc_expression(X)
 
         return f
 
@@ -91,13 +83,29 @@ class LinearRegression:
         f = self.coefficients[-1].value
         for idx, c in enumerate(self.coefficients):
             if idx < len(self.coefficients) - 1:
-                f += c.value * features[idx]
+                f += c.value * features[:, idx].reshape(-1, 1)
         return f
 
-    def _sample_batches(self):
-        pass
+    def _update_with_gradients(self, f, X, y):
+        for idx, c in enumerate(self.coefficients):
+            self.coefficients[idx].log.append(self.coefficients[idx].value)
+            if idx == len(self.coefficients)-1:
+                gradient = self._lr * np.mean(self.loss_function(f, y, derivative=True))
+            else:
+                gradient = self._lr * np.mean(np.multiply(X[:, idx].reshape(-1, 1), self.loss_function(f, y, derivative=True)))
+            self.coefficients[idx].value -= gradient
+            self.coefficients[idx].gradients.append(gradient)
 
+    def _sample_batches(self, X, y):
+        X_shuffled = X.copy()
+        y_shuffled = y.copy()
+        X_shuffled, y_shuffled = shuffle(X_shuffled, y_shuffled)
 
+        num_batches = m.floor(X.shape[0] / self._mini_batch_size)
+        X_batches = [np.array(X_shuffled[i:i+self._mini_batch_size, :]) for i in range(num_batches)]
+        y_batches = [np.array(y_shuffled[i:i+self._mini_batch_size, :]) for i in range(num_batches)]
+
+        return X_batches, y_batches
 
 class RegressionCoefficient:
 
