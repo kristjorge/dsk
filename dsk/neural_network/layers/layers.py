@@ -5,7 +5,7 @@ import numpy as np
 class FullyConnectedLayer:
 
     def __init__(self, size, activation_function=relu):
-        self.activation_function = np.vectorize(activation_function)
+        self.activation_function = activation_function
         self.size = size
         self.network = None
         self.layer_no = None
