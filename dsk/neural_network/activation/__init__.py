@@ -1,1 +1,1 @@
-from .activation_functions import relu, linear, sigmoid, tanh, arctan
+from .activation_functions import relu, linear, sigmoid, tanh, arctan, softmax
